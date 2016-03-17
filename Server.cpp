@@ -9,6 +9,7 @@ using namespace std;
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #else
@@ -213,105 +214,51 @@ void receive_data()
 {
 	char buffer[BUFFER_SIZE];
 
-	for ( int j = 0; j < MAX_CLIENTS; j++ )
+	for (int j = 0; j < MAX_CLIENTS; j++)
 	{
-		if ( client[j].connected )
+		if (client[j].connected)
 		{
-			if ( receive_client ( &client[j], buffer, BUFFER_SIZE ) )
-			{
-				if ( buffer[0] == '~' )
-				{ // All data should be buffered by a '~' just because
-
-					if ( buffer[1] == '1' ) // Add Client Command
-					{
-						// Declare the buffer to store new client information into
-						char raw_data[BUFFER_SIZE];
-						char answer[BUFFER_SIZE];
-						midcopy ( buffer, raw_data, 0, strlen ( buffer ) );
-						long num1 = 0;
-						long num2 = 0;
-						int k = 0;
-						char oper;
-						while (isdigit(buffer[k]))
-						{
-						    k++;
-						}
-                        if(buffer[k] = '+')
-                        {
-                            sscanf(buffer, "%d %s %d", &num1, oper, &num2);
-                            long full = num1 + num2;
-                            memcpy(&full, answer, sizeof(long));
-                        }
-                        else if(buffer[k] = '-')
-                        {
-                            sscanf(buffer, "%d %s %d", &num1, oper, &num2);
-                            long full = num1 - num2;
-                            memcpy(&full, answer, sizeof(long));
-                        }
-                        else if(buffer[k] = '*')
-                        {
-                            sscanf(buffer, "%d %s %d", &num1, oper, &num2);
-                            float full = num1 * num2;
-                            memcpy(&full, answer, sizeof(float));
-                        }
-                        else if(buffer[k] = '/')
-                        {
-                            sscanf(buffer, "%d %s %d", &num1, oper, &num2);
-                            float full = num1 / num2;
-                            memcpy(&full, answer, sizeof(float));
-                        }
-
-
-
-
-						// Store the client information into our RAM client database
-						//sscanf ( raw_data, "%s %s %s", client[j].template_name, client[j].screen_name, client[j].siegepos );
-
-						/*for ( int k = 0; k < MAX_CLIENTS; k++ )
-						{
-							if ( ( client[k].connected ) && ( j != k ) )
-							{
-								// Parse in the client data to send
-								sprintf ( raw_data, "~1 %s %s %s", client[k].template_name, client[k].screen_name, client[k].siegepos );
-
-								// Send the client data
-								send_data ( &client[j], raw_data, BUFFER_SIZE );
-							}
-						}*/
-						send_data ( &client[j], answer, BUFFER_SIZE );
-					}
-					else if ( buffer[1] == '2' ) // Move Client Command
-					{
-						// Declare the buffer to store new client information into
-						char raw_data[BUFFER_SIZE];
-
-						// Parse out the 'Move Client' command
-						midcopy ( buffer, raw_data, 3, strlen ( buffer ) );
-
-						// Update the client information into our RAM client database
-						sscanf ( raw_data, "%s %s", client[j].screen_name, client[j].siegepos );
-					}
-					else if ( buffer[1] == '3' ) // Chat Client Command
-					{
-						// ECHO THE MESSAGE BACK TO ALL CLIENTS
-					}
-					else if ( buffer[1] == '4' ) // Remove Client Command
-					{
-						// Disconnect the current client
-						disconnect_client ( &client[j] );
-					}
-
-					// Display all data received
-					//
-
-					cout << buffer << endl;
-
-					// Echo the message to the other clients
-					echo_message ( buffer );
-
-					// Clear the buffer
-					buffer[0] = '\0';
+			if (receive_client(&client[j], buffer, BUFFER_SIZE))
+			{		// Declare the buffer to store new client information into
+				cout << "Recieved data: " << buffer << endl;
+				char raw_data[BUFFER_SIZE];
+				char answer[BUFFER_SIZE];
+				midcopy(buffer, raw_data, 0, strlen(buffer));
+				long num1 = 0;
+				long num2 = 0;
+				char* number1 = (char*)malloc(sizeof(10));
+				int k = 0;
+				char oper;
+				sscanf(raw_data, "%d%c%d", &num1, &oper, &num2);
+				
+				if (oper == '+')
+				{
+					long full = num1 + num2;
+					sprintf(answer, "%d", full);
 				}
+				else if (oper == '-')
+				{
+					long full = num1 - num2;
+					sprintf(answer, "%d", full);
+				}
+				else if (oper == '*')
+				{
+					long full = num1 * num2;
+					sprintf(answer, "%d", full);
+				}
+				else if (oper == '/')
+				{
+					float full = num1 / num2;
+					sprintf(answer, "%f", full);
+				}
+
+
+
+				cout << "First digit: " << num1 << " Second digit: " << num2 << " Operator: " << oper << " Answer: " << answer << endl;
+				
+				send_data(&client[j], answer, BUFFER_SIZE);
+				buffer[0] = '\0';
+				
 			}
 		}
 	}
@@ -321,6 +268,7 @@ int send_data ( _client *current_client, char *buffer, int size )
 {
 	// Store the return information about the sending
 	current_client->address_length = send ( current_client->socket, buffer, size, 0 );
+	cout << "Sent data: " << current_client->address_length << endl;
 
 	if ( ( current_client->address_length < 0 ) || ( current_client->address_length == 0 ) )
 	{ // Check for errors while sending
