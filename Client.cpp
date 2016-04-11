@@ -79,34 +79,34 @@ int main(int argc, char *argv[]){
     }
     while(1){
 		cout << "Enter wanted operation (e.g. 4+4 or 1*2): " << endl;
-		fgets(buffer, BUFFLEN, stdin);
-		/*
-		 * Iðsiunèiamas praneðimas serveriui
-		*/
-		if(strstr(buffer, "stop") != NULL)
-		{
-			break;
-		}
-		if(send(s_socket,buffer,strlen(buffer),0) < 0)
-		{
-			cout << "Send failed." << endl;
-			break;
-		}
+    fgets(buffer, BUFFLEN, stdin);
+    /*
+     * Iðsiunèiamas praneðimas serveriui
+     */
+    if(strstr(buffer, "stop") != NULL)
+    {
+        break;
+    }
+    if(send(s_socket,buffer,strlen(buffer),0) < 0)
+    {
+		cout << "Send failed." << endl;
+        break;
+    }
 
-		memset(&buffer,0,BUFFLEN);
-		/*
-		* Praneðimas gaunamas ið serverio
-		*/
-		if(recv(s_socket,buffer,BUFFLEN,0) < 0)
-		{
-			cout << "recv failed." << endl;
-			break;
-		}
-		cout << "Server sent: " << buffer << endl;
+    memset(&buffer,0,BUFFLEN);
+    /*
+     * Praneðimas gaunamas ið serverio
+     */
+    if(recv(s_socket,buffer,BUFFLEN,0) < 0)
+    {
+		cout << "recv failed." << endl;
+        break;
+    }
+	cout << "Server sent: " << buffer << endl;
 
-		/*
-		* Socket'as uþdaromas
-		*/
+    /*
+     * Socket'as uþdaromas
+     */
     }
     close(s_socket);
     return 0;

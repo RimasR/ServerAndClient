@@ -108,7 +108,7 @@ int accept_connections()
 					// Increment the client count
 					clients_connected++;
 
-					// Grab the ip address of the client ... just for fun
+					// Grab the ip address of the client
 					char *client_ip_address = inet_ntoa ( client[j].address.sin_addr );
 
 					// Output connection
@@ -288,8 +288,8 @@ void start_server()
 	int res, i = 1;
 
 	// Set up the address structure
-	server_address.sin_family = AF_INET;
-	server_address.sin_addr.s_addr = INADDR_ANY;
+	server_address.sin_family = AF_INET; //TCP/IP 
+	server_address.sin_addr.s_addr = INADDR_ANY; //
 	server_address.sin_port = htons ( PORT);
 
 	// IM GUESSING : Copy over some addresses, conversions of some sort ?
@@ -341,7 +341,7 @@ void start_server()
 	// This makes the server non blocking, hence it won't wait for a response
 	unsigned long b = 1;
 #ifdef _WIN32
-	ioctlsocket ( server_socket, FIONBIO, &b );
+	ioctlsocket ( server_socket, FIONBIO, &b ); //FIONBIO - block / non block server
 #else
 	ioctl(server_socket, FIONBIO, &b);
 #endif
